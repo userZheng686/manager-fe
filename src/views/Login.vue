@@ -10,6 +10,20 @@ export default {
         goHome(){
             this.$router.push('/welcome')
         }
+    },
+    mounted(){
+        // this.$request({
+        //     methods : 'get',
+        //     path : '/login',
+        //     data : {
+        //         name : 'jack'
+        //     }
+        // }).then(res => {
+        //     console.log(res)
+        // })
+        this.$request.get('/login',{name:'jack'}).then((res) => {
+            console.log(res)
+        })
     }
 }
 </script>

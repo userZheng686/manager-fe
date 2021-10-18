@@ -6,9 +6,9 @@ const routes = [
         name : 'home',
         path : '/',
         component : () => import('../views/Home.vue'),
-        // redirect : {
-        //     name : 'welcome'
-        // },
+        redirect : {
+            name : 'welcome'
+        },
         meta : {
             title : '首页'
         },
