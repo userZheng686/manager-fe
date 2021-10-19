@@ -5,7 +5,7 @@ const routes = [
     {
         name : 'home',
         path : '/',
-        component : () => import('../views/Home.vue'),
+        component : () => import('./../components/Home.vue'),
         redirect : {
             name : 'welcome'
         },
@@ -20,16 +20,16 @@ const routes = [
                 meta : {
                     title : '欢迎页'
                 }
-            },
-            {
-                name : 'login',
-                path : '/login',
-                component : () => import('../views/Login.vue'),
-                meta : {
-                    title : '登录页'
-                }
             }
         ]
+    },
+    {
+        name : 'login',
+        path : '/login',
+        meta : {
+            title : '登录'
+        },
+        component : () => import('./../views/login.vue')
     }
 ]
 

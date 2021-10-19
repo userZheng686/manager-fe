@@ -10,15 +10,16 @@ const EnvConfig = {
     },
     test : {
         baseApi : '/',
-        mockApi : ''
+        mockApi : 'https://www.fastmock.site/mock/eb848828aa92ca8ec4b39a0ed23a828a/api'
     },
     prod : {
         baseApi : '/',
-        mockApi : ''
+        mockApi : 'https://www.fastmock.site/mock/eb848828aa92ca8ec4b39a0ed23a828a/api'
     }
 }
 
 export default{
+    namespace : 'manager',
     env,
     mock : true,
     ...EnvConfig[env]
