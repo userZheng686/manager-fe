@@ -18,6 +18,7 @@
 </template>
 
 <script>
+import md5 from 'md5'
 export default {
     name : 'login',
     data(){
@@ -44,6 +45,7 @@ export default {
         login(){
             this.$refs.userForm.validate((valid) => {
                 if(valid){
+                    this.user.userPwd = md5(this.user.userPwd)
                     this.$api.login(this.user).then((res) => {
                        this.$store.commit('saveUserInfo',res)
                        this.$router.push('/welcome')
@@ -57,20 +59,6 @@ export default {
             this.$router.push('/welcome')
         }
     },
-    mounted(){
-        // this.$request({
-        //     methods : 'get',
-        //     path : '/login',
-        //     data : {
-        //         name : 'jack'
-        //     }
-        // }).then(res => {
-        //     console.log(res)
-        // })
-        // this.$request.get('/login',{name:'jack'}).then((res) => {
-        //     console.log(res)
-        // })
-    }
 }
 </script>
 
