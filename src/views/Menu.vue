@@ -20,7 +20,7 @@
         <div class="action">
             <el-button type="primary" @click="handleAdd(1)">新增</el-button>
         </div>
-        <el-table :data="menuList" row-key="_id" :tree-props="{children:'children'}">
+        <el-table v-loading="getMenu.length === 0" :data="getMenu" row-key="_id" :tree-props="{children:'children'}">
             <el-table-column
                 v-for="item in columns"
                 :key="item.prop"
@@ -48,7 +48,7 @@
             <el-form-item label="父级菜单" prop="parentId">
             <el-cascader 
                 v-model="menuForm.parentId" 
-                :options="menuList"
+                :options="getMenu"
                 :props="{checkStrictly:true,value:'_id',label:'menuName'}"
                 />
                 <span>    不选，则直接创建一级菜单</span>
@@ -59,14 +59,14 @@
                 <el-radio :label="2">按钮</el-radio>
             </el-radio-group>
             </el-form-item>
-            <el-form-item label="菜单名称" prop="menuName" >
+            <el-form-item :label="menuForm.menuType === 2 ? '按钮名称' : '菜单名称'" prop="menuName" >
             <el-input
                 v-model="menuForm.menuName"
-                placeholder="请输入菜单名称"
+                :placeholder="menuForm.menuType === 2 ? '请输入按钮名称' : '请输入菜单名称' "
             ></el-input>
             </el-form-item>
             <el-form-item label="菜单图标" prop="icon" v-show="menuForm.menuType==1">
-            <el-input v-model="menuForm.icon" placeholder="请输入岗位"></el-input>
+            <el-input v-model="menuForm.icon" placeholder="请输入菜单图标"></el-input>
             </el-form-item>
             <el-form-item label="路由地址" prop="path" v-show="menuForm.menuType==1">
             <el-input v-model="menuForm.path" placeholder="请输入路由地址"></el-input>
@@ -74,7 +74,7 @@
             <el-form-item label="权限标识" prop="menuCode" v-show="menuForm.menuType==2">
             <el-input v-model="menuForm.menuCode" placeholder="请输入权限标识"></el-input>
             </el-form-item>
-            <el-form-item label="组件路径" prop="menuCode" v-show="menuForm.menuType==1">
+            <el-form-item label="组件路径" prop="component" v-show="menuForm.menuType==1">
             <el-input v-model="menuForm.component" placeholder="请输入组件路径"></el-input>
             </el-form-item>
             <el-form-item label="菜单状态" prop="menuState" v-show="menuForm.menuType==1">
@@ -116,7 +116,6 @@ export default {
                 component : '',
                 menuState : 1
             },
-            menuList : [],
             showModal : false,
             action : '',
             columns : [{
@@ -164,7 +163,7 @@ export default {
                 menuName : [
                 {
                     required : true,
-                    message : '请输入菜单名称',
+                    message : `${this.menuForm.menuType === 2 ? '请输入按钮名称' : '请输入菜单名称'}`,
                     trigger : 'blur'
                 },
                 {
@@ -172,21 +171,35 @@ export default {
                     max : 10,
                     message : '长度在2-8个字符',
                     trigger : 'blur'
-                }]
+                }],
+                component : [
+                    {
+                        required : true,
+                        message : '请输入组件路径',
+                        trigger : 'blur'
+                    },
+                ],
+                path : [
+                    {
+                        required : true,
+                        message : '请输入路由地址',
+                        trigger : 'blur'
+                    },
+                ]
             }
         }
     },
+    computed : {
+        getMenu(){
+            return this.$store.state.menuList
+        }
+    },
     mounted() {
-        this.getMenuList()
+       this.getMenuList()
     },
     methods: {
         async getMenuList(){
-            try {
-                let list = await this.$api.getMenuList(this.queryForm)
-                this.menuList = list
-            } catch (Error){
-                throw new Error
-            }  
+            await this.$store.dispatch('queryMenuList',this.queryForm)
         },
         handleAdd(type,row){
             this.showModal = true
@@ -221,11 +234,12 @@ export default {
             this.action = 'edit'
             this.menuForm = row
             this.$nextTick(() => {
-                Object.assign(this.menuForm,row)
+                row = JSON.parse(JSON.stringify(row))
+                this.menuForm = row
             })
         },
-        async handleDel(id){
-            let res = await this.$api.menuSubmit({id,action:'delete'})
+        async handleDel(_id){
+            let res = await this.$api.menuSubmit({_id,action:'delete'})
             this.$message.success('删除成功')
             this.getMenuList()
         },

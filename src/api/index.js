@@ -27,11 +27,26 @@ export default {
             mock:false
         })
     },
+    getPermissionList(){
+        return request({
+            url : '/users/getPermissionList',
+            method : 'get',
+            data : {},
+            mock:false
+        })
+    },
     getUserList(params){
         return request({
             url : '/users/list',
             method : 'get',
             data : params,
+        })
+    },
+    getAllUserList(){
+        return request({
+            url : '/users/all/list',
+            method : 'get',
+            data : {},
             mock:false
         })
     },
@@ -42,12 +57,12 @@ export default {
             data : params,
         })
     },
-    getRoleList(){
+    getRoleList(params){
         return request({
             url : '/roles/list',
             method : 'get',
-            data : {},
-            mock:true
+            data : params,
+            mock:false
         })
     },
     getRoleAllList(){
@@ -55,7 +70,7 @@ export default {
             url : '/roles/allList',
             method : 'get',
             data : {},
-            mock:true
+            mock:false
         })
     },
     getDeptList(){
@@ -63,7 +78,15 @@ export default {
             url : '/dept/list',
             method : 'get',
             data : {},
-            mock:true
+            mock:false
+        })
+    },
+    deptOperate(params){
+        return request({
+            url : '/dept/operate',
+            method : 'post',
+            data : params,
+            mock:false
         })
     },
     userSubmit(params){
@@ -81,4 +104,20 @@ export default {
             mock : false
         })
     },
+    roleOperate(params){
+        return request({
+            url : '/roles/operate',
+            method : 'post',
+            data : params,
+            mock : false
+        })
+    },
+    updatePermission(params){
+        return request({
+            url : '/roles/update/permission',
+            method : 'post',
+            data : params,
+            mock : false
+        })
+    }
 }

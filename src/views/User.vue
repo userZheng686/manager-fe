@@ -3,7 +3,7 @@
     <div class="query-form">
       <el-form ref="form" :inline="true" :model="user">
         <el-form-item prop="userId">
-          <el-input v-model="user.userId" placeholder="请输入用户ID"></el-input>
+          <el-input v-model="user.userId" placeholder="请输入角色ID"></el-input>
         </el-form-item>
         <el-form-item prop="userName">
           <el-input
@@ -27,11 +27,12 @@
     </div>
     <div class="base-table">
       <div class="action">
-        <el-button type="primary" @click="handleCreate">新增</el-button>
-        <el-button type="danger" @click="handlePatchDel">批量删除</el-button>
+        <el-button type="primary" @click="handleCreate" v-has:add="'user-create'">新增</el-button>
+        <el-button type="danger" @click="handlePatchDel" v-has="'user-patch-delete'">批量删除</el-button>
       </div>
       <el-table
         :data="userList"
+        v-loading="userList.length === 0" 
         @selection-change="handleSectionChange"
         style="width: 100%"
       >
@@ -45,10 +46,9 @@
         />
         <el-table-column label="操作" width="150">
           <template #default="scope">
-            <el-button type="primary" size="mini" @click="handleEdit(scope.row)">编辑</el-button>
-            <el-button type="danger" size="mini" @click="handleDel(scope.row)"
-              >删除</el-button
-            >
+            <el-button type="primary" v-has="'user-edit'" size="mini" @click="handleEdit(scope.row)">编辑</el-button>
+            <el-button type="danger" size="mini" v-has="'user-delete'" @click="handleDel(scope.row)"
+              >删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -96,18 +96,19 @@
               <el-option :value="3" label="试用期"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="系统角色" prop="roleList">
+          <el-form-item label="系统角色" prop="rolelist">
             <el-select
-              v-model="userForm.roleList"
+              v-model="userForm.rolelist"
               placeholder="请选择用户系统角色"
               multiple
               style="width: 100%;"
             >
+
               <el-option 
-              v-for="role in roleList" 
-              :label="role.roleName" 
-              :key="role._id" 
-              :value="role._id"></el-option>
+              v-for="item in roleLists" 
+              :label="item.roleName" 
+              :key="item._id" 
+              :value="item._id"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="部门" prop="deptId">
@@ -212,9 +213,12 @@ export default {
       mobile: "",
       job: "",
       state: 3,
-      roleList: "",
+      rolelist: [],
       deptId: "",
     });
+
+
+
     //定义表单校验规则
     const rules = reactive({
       userName: [
@@ -245,9 +249,16 @@ export default {
           trigger: "blur",
         },
       ],
+      rolelist : [
+        {
+          required: true,
+          message: "请选择所属部门",
+          trigger: "blur",
+        },
+      ]
     });
     //角色列表
-    const roleList = ref([])
+    const roleLists = ref([])
     //部门列表
     const deptList = ref([])
     //定义用户操作的行为
@@ -264,6 +275,7 @@ export default {
         ctx.$refs.dialogForm.validate(async (valid) => {
             if(valid){
                 let params = toRaw(userForm);
+                console.log('userForm',userForm)
                 params.userEmail += '@qq.com'
                 params.action = action.value
                 let res = await $api.userSubmit(params)
@@ -287,7 +299,9 @@ export default {
         action.value = 'edit'
         showModal.value = true
         ctx.$nextTick(() => {
+            console.log(row,'row','userForm',userForm)
             Object.assign(userForm,row)
+            
         })
         
     }
@@ -334,7 +348,7 @@ export default {
     //删除事件
     const handleDel = async (row) => {
       await $api.userDel({
-        userIds: [row.userId],
+        userIds: [row._id],
       });
       $message.success("删除成功");
       getUserList();
@@ -349,7 +363,7 @@ export default {
       const res = await $api.userDel({
         userIds: checkedUserIds.value,
       });
-      if (res.matchedCount > 0) {
+      if (res.deletedCount > 0) {
         $message.success("删除成功");
         getUserList();
       } else {
@@ -362,7 +376,7 @@ export default {
       console.log("list", list);
       let arr = [];
       list.map((item) => {
-        arr.push(item.userId);
+        arr.push(item._id);
       });
       checkedUserIds.value = arr;
     };
@@ -380,7 +394,7 @@ export default {
 
     const getRoleAllList = async () => {
       const list = await $api.getRoleAllList()
-      roleList.value = list
+      roleLists.value = list
     }
 
     return {
@@ -390,7 +404,7 @@ export default {
       action,
       pager,
       rules,
-      roleList,
+      roleLists,
       deptList,
       userForm,
       getUserList,

@@ -70,8 +70,8 @@ export default {
       isCollapse: false,
       userInfo: this.$store.state.userInfo,
       noticeCount: 0,
-      userMenu: [],
       activeMenu: location.hash.slice(1),
+      userMenu : []
     };
   },
   mounted() {
@@ -85,6 +85,8 @@ export default {
     handleLogout(key) {
       if (key == "email") return;
       this.$store.commit("saveUserInfo", "");
+      this.$store.commit("saveUserMenu", "");
+      this.$store.commit("saveUserAction", "");
       this.userInfo = null;
       this.$router.push("/login");
     },
@@ -98,27 +100,34 @@ export default {
     },
     async getMenuList() {
       try {
-        const list = await this.$api.getMenuList();
-        this.userMenu = list;
-        console.log(this.userMenu)
-      } catch (error) {
-        console.error(error);
+        let {menuList,actionList} = await this.$api.getPermissionList()
+        this.userMenu = menuList
+        this.$store.commit('saveUserMenu',menuList)
+        this.$store.commit('saveUserAction',actionList)
+      } catch (error){
+
       }
+      
+     
     },
   },
 };
 </script>
 
 <style lang="scss">
+.el-icon{
+  margin: auto !important;
+}
+
 .basic-layout {
+  display: flex;
+  align-items: stretch;
   position: relative;
+  max-width : 100vw;
   .nav-side {
-    position: fixed;
     width: 200px;
-    height: 100vh;
     background-color: #001529;
     color: #fff;
-    overflow-y: auto;
     transition: width 0.5s;
     .logo {
       display: flex;
@@ -145,14 +154,15 @@ export default {
     }
   }
   .content-right {
-    margin-left: 200px;
+    flex: 1;
+    overflow-x: auto;
     // 合并
     &.fold {
-      margin-left: 64px;
+      // margin-left: 64px;
     }
     // 展开
     &.unfold {
-      margin-left: 200px;
+      // margin-left: 200px;
     }
     .nav-top {
       height: 50px;
@@ -183,7 +193,7 @@ export default {
     .wrapper {
       background: #eef0f3;
       padding: 20px;
-      height: calc(100vh - 50px);
+      min-height:93vh;
       .main-page {
         background: #fff;
         height: 100%;

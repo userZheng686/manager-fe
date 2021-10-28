@@ -8,6 +8,7 @@ import request from './utils/request.js'
 import storage from './utils/storage.js'
 import store from './store'
 import drag from './plugins/drag'
+import has from './plugins/has'
 
 import api from './api/index'
 import App from './App.vue'
@@ -17,4 +18,4 @@ app.config.globalProperties.$request = request
 app.config.globalProperties.$api = api
 app.config.globalProperties.$storage = storage
 app.config.globalProperties.$message = ElMessage
-app.use(router).use(store).use(drag).use(ElementPlus,{size:'small'}).mount('#app')
+app.use(router).use(store).use(drag).use(has).use(ElementPlus,{size:'small'}).mount('#app')
