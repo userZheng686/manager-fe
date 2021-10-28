@@ -5,6 +5,7 @@ import axios from "axios";
 import config from './../config'
 import {ElMessage} from 'element-plus'
 import router from './../router'
+import storage from './storage.js'
 const TOKEN_INVALID = 'Token认证失败，请重新登录'
 const NETWORK_ERROR = '网络请求异常，请稍后重试'
 
@@ -18,7 +19,11 @@ const service = axios.create({
 service.interceptors.request.use((req) => {
     // TO-DO
     const headers = req.headers
-    if(headers.Authorization) headers.Authorization = 'Bear Jack'
+    if(storage.getItem('userInfo')){
+        const {token} = storage.getItem('userInfo')
+        if(!headers.Authorization) headers.Authorization = 'Bearer ' + token
+    }
+    
     return req
 })
 
@@ -27,15 +32,15 @@ service.interceptors.response.use((res) => {
     const {code,data,msg} = res.data
     if(code === 200){
         return data
-    }else if(code === 40001){
+    }else if(code === 50001){
         ElMessage.error(TOKEN_INVALID)
         setTimeout(() => {
             router.push('/login')
-        },15000)
+        },1500)
         return Promise.reject(TOKEN_INVALID)
     }else{
-        ElMessage.error(TOKEN_INVALID)
-        return Promise.reject(TOKEN_INVALID)
+        ElMessage.error(msg || NETWORK_ERROR)
+        return Promise.reject(msg || NETWORK_ERROR)
     }
 })
 
@@ -49,11 +54,14 @@ function request(options){
     if(options.method.toLowerCase() === 'get'){
         options.params = options.data
     }
-
+    let isMock = config.mock
+    if(typeof options.mock !== 'undefined'){
+        isMock = options.mock
+    }
     if(config.env === 'prod'){
         service.defaults.baseURL = config.baseApi
     }else{
-        service.defaults.baseURL = config.mock ? config.mockApi : config.baseApi
+        service.defaults.baseURL = isMock ? config.mockApi : config.baseApi
     }
     return service(options)
 }
